@@ -39,8 +39,12 @@ app.get('/api/persons/info', (req, res) => {
       res.send(
         `<p>Phonebook has info for ${count} people</p><p>${new Date()}</p>` )
     })
-      
+      .catch(error => {
+        console.error('error fetching person:', error)
+        res.status(404).send({error: 'server error'})
      })
+
+})
 
 
 app.get('/api/persons', (req, res) => {
@@ -53,17 +57,7 @@ app.get('/api/persons', (req, res) => {
   })
 })
 
-const errorHandler = (error, req, res, next) => {
-  console.error(error.message)
 
-  if (error.name === 'CastError') {
-    return res.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {
-    return res.status(400).json({ error: error.message })
-  }
-
-  next(error)
-}
 
 app.post('/api/persons', (req, res, next) => {
   const body = req.body
@@ -128,6 +122,18 @@ const unknownEndpoint = (req, res) => {
 
 app.use(unknownEndpoint)
 // este debe ser el último middleware cargado, ¡también todas las rutas deben ser registrada antes que esto!
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
+  }
+
+  next(error)
+}
+
 app.use(errorHandler)
 
 
